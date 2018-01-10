@@ -1,10 +1,27 @@
 <html>
-    some text
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <script>
         var canvas;
         var canvasContext;
         var ballX = 50;
+        var ballY = 50;
+        var ballSpeedX = 10;
+        var ballSpeedY = 4;
+
+        var paddle1Y = 250;
+        const PADDLE_HEIGHT = 100;
+
+        function calculateMousePos(evt) {
+            var rect = canvas.getBoundingClientRect();
+            var root = document.documentElement;
+            var mouseX = evt.clientX - rect.left - root.scrollLeft;
+            var mouseY = evt.clientY - rect.top - root.scrollTop;
+            return {
+                x:mouseX,
+                y:mouseY
+            }
+
+        }
         
         window.onload = function() { 
             canvas = document.getElementById('gameCanvas');
@@ -15,19 +32,55 @@
                 moveEverything();
                 drawEverything();
             }, 1000/framesPerSecond );
-        }
+            
+            // this for being in the middle of the pad
 
+            canvas.addEventListener('mousemove',
+                function(evt) {
+                    var mousePos = calculateMousePos(evt);
+                    paddle1Y = mousePos.y-(PADDLE_HEIGHT/2);
+                });
+        }
+        // ball can move horizontally and vertically 
         function moveEverything() {
-            ballX = ballX + 20;
+            ballX = ballX + ballSpeedX;
+            ballY = ballY + ballSpeedY;
+            if(ballX < 0 ) {
+                ballSpeedX = -ballSpeedX;
+            }
+            if(ballX > canvas.width) {
+                ballSpeedX = -ballSpeedX;
+            }
+            if(ballY < 0 ) {
+                ballSpeedY = -ballSpeedY;
+            }
+            if(ballY > canvas.height) {
+                ballSpeedY = -ballSpeedY;
+            }
         }
 
         function drawEverything() {
-            canvasContext.fillStyle = 'black';
-            canvasContext.fillRect(0,0,canvas.width,canvas.height);
-            canvasContext.fillStyle = 'white';
-            canvasContext.fillRect(0,210,10,100);
-            canvasContext.fillStyle = 'red';
-            canvasContext.fillRect(ballX,100,10,10);
+            //this is the canvas base 
+            colorRect(0,0,canvas.width,canvas.height,'black');
+
+            //this is left paddle 
+            colorRect(0,paddle1Y,10,PADDLE_HEIGHT,'white');
+
+            //this is the ball 
+            colorCircle(ballX, ballY, 10, 'red')
+        }
+        //helper fuction for drawing a circle
+        function colorCircle(centreX, centreY, radius, drawColor) {
+            canvasContext.fillStyle = drawColor; 
+            canvasContext.beginPath();
+            canvasContext.arc(centreX, centreY, radius, 0, Math.PI*2, true);
+            canvasContext.fill();
+        }
+
+        //helper function drawing 
+        function colorRect(leftX,topY, width,height, drawColor) {
+            canvasContext.fillStyle = drawColor;
+            canvasContext.fillRect(leftX,topY, width,height);
         }
     </script>
 </html>
